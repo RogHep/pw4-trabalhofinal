@@ -1,7 +1,11 @@
+// src/pages/imoveis/CriarImovel.jsx
 import { useState, useEffect } from "react";
 import api from "../../services/api";
+import { useNavigate } from "react-router-dom";
 
 export default function CriarImovel() {
+  const navigate = useNavigate();
+
   const [form, setForm] = useState({
     titulo: "",
     descricao: "",
@@ -21,24 +25,23 @@ export default function CriarImovel() {
     caracteristicas: "",
     destaque: false,
     tipoImovel: "",
-    bairro: ""
+    bairro: "",
   });
 
   const [tipos, setTipos] = useState([]);
   const [bairros, setBairros] = useState([]);
 
   useEffect(() => {
-    api.get("/tiposimoveis").then(res => setTipos(res.data));
-    api.get("/bairros").then(res => setBairros(res.data));
+    api.get("/tiposimoveis").then((res) => setTipos(res.data));
+    api.get("/bairros").then((res) => setBairros(res.data));
   }, []);
 
   function handleChange(e) {
     const { name, value, type, checked } = e.target;
-
-    setForm({
-      ...form,
-      [name]: type === "checkbox" ? checked : value
-    });
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   }
 
   function salvar(e) {
@@ -46,100 +49,272 @@ export default function CriarImovel() {
 
     const payload = {
       ...form,
+
+      // Conversão de campos numéricos
+      precoVenda: form.precoVenda ? Number(form.precoVenda) : null,
+      precoAluguel: form.precoAluguel ? Number(form.precoAluguel) : null,
+      areaTotal: form.areaTotal ? Number(form.areaTotal) : null,
+      areaConstruida: form.areaConstruida ? Number(form.areaConstruida) : null,
+
+      dormitorios: form.dormitorios ? Number(form.dormitorios) : null,
+      banheiros: form.banheiros ? Number(form.banheiros) : null,
+      garagem: form.garagem ? Number(form.garagem) : null,
+
+      // Objetos obrigatórios
       tipoImovel: { id: Number(form.tipoImovel) },
-      bairro: { id: Number(form.bairro) }
+      bairro: { id: Number(form.bairro) },
     };
 
-    api.post("/imoveis", payload)
+    api
+      .post("/imoveis", payload)
       .then(() => {
-        alert("Imóvel cadastrado!");
+        alert("Imóvel cadastrado com sucesso!");
+        navigate("/imoveis");
       })
-      .catch(err => {
-        console.log(err);
-        alert("Erro ao salvar.");
+      .catch((err) => {
+        console.error(err);
+        alert("Erro ao salvar imóvel. Confira se todos os campos obrigatórios foram preenchidos.");
       });
   }
 
   return (
-    <div className="content">
-      <h1>Novo Imóvel</h1>
+    <div className="max-w-3xl mx-auto bg-white shadow p-8 rounded-lg">
+      <h1 className="text-2xl font-semibold mb-6">Novo Imóvel</h1>
 
-      <form onSubmit={salvar}>
-        <label>Título</label>
-        <input name="titulo" value={form.titulo} onChange={handleChange} />
+      <form onSubmit={salvar} className="grid grid-cols-1 gap-4">
 
-        <label>Descrição</label>
-        <textarea name="descricao" value={form.descricao} onChange={handleChange} />
+        {/* Título */}
+        <div>
+          <label className="block font-medium">Título</label>
+          <input
+            name="titulo"
+            className="input"
+            value={form.titulo}
+            onChange={handleChange}
+          />
+        </div>
 
-        <label>Preço de Venda</label>
-        <input name="precoVenda" value={form.precoVenda} onChange={handleChange} />
+        {/* Descrição */}
+        <div>
+          <label className="block font-medium">Descrição</label>
+          <textarea
+            name="descricao"
+            className="input"
+            value={form.descricao}
+            onChange={handleChange}
+          />
+        </div>
 
-        <label>Preço de Aluguel</label>
-        <input name="precoAluguel" value={form.precoAluguel} onChange={handleChange} />
+        {/* Preços */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block font-medium">Preço de Venda</label>
+            <input
+              type="number"
+              name="precoVenda"
+              className="input"
+              value={form.precoVenda}
+              onChange={handleChange}
+            />
+          </div>
 
-        <label>Finalidade</label>
-        <select name="finalidade" value={form.finalidade} onChange={handleChange}>
-          <option value="">Selecione</option>
-          <option value="venda">Venda</option>
-          <option value="aluguel">Aluguel</option>
-        </select>
+          <div>
+            <label className="block font-medium">Preço de Aluguel</label>
+            <input
+              type="number"
+              name="precoAluguel"
+              className="input"
+              value={form.precoAluguel}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
 
-        <label>Status</label>
-        <select name="status" value={form.status} onChange={handleChange}>
-          <option value="">Selecione</option>
-          <option value="ativo">Ativo</option>
-          <option value="inativo">Inativo</option>
-        </select>
+        {/* Finalidade e Status */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block font-medium">Finalidade</label>
+            <select
+              name="finalidade"
+              className="input"
+              value={form.finalidade}
+              onChange={handleChange}
+            >
+              <option value="">Selecione</option>
+              <option value="venda">Venda</option>
+              <option value="aluguel">Aluguel</option>
+            </select>
+          </div>
 
-        <label>Dormitórios</label>
-        <input name="dormitorios" value={form.dormitorios} onChange={handleChange} />
+          <div>
+            <label className="block font-medium">Status</label>
+            <select
+              name="status"
+              className="input"
+              value={form.status}
+              onChange={handleChange}
+            >
+              <option value="">Selecione</option>
+              <option value="ativo">Ativo</option>
+              <option value="inativo">Inativo</option>
+            </select>
+          </div>
+        </div>
 
-        <label>Banheiros</label>
-        <input name="banheiros" value={form.banheiros} onChange={handleChange} />
+        {/* Detalhes numéricos */}
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="block font-medium">Dormitórios</label>
+            <input
+              type="number"
+              name="dormitorios"
+              className="input"
+              value={form.dormitorios}
+              onChange={handleChange}
+            />
+          </div>
 
-        <label>Garagem</label>
-        <input name="garagem" value={form.garagem} onChange={handleChange} />
+          <div>
+            <label className="block font-medium">Banheiros</label>
+            <input
+              type="number"
+              name="banheiros"
+              className="input"
+              value={form.banheiros}
+              onChange={handleChange}
+            />
+          </div>
 
-        <label>Área Total</label>
-        <input name="areaTotal" value={form.areaTotal} onChange={handleChange} />
+          <div>
+            <label className="block font-medium">Garagem</label>
+            <input
+              type="number"
+              name="garagem"
+              className="input"
+              value={form.garagem}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
 
-        <label>Área Construída</label>
-        <input name="areaConstruida" value={form.areaConstruida} onChange={handleChange} />
+        {/* Áreas */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block font-medium">Área Total</label>
+            <input
+              type="number"
+              name="areaTotal"
+              className="input"
+              value={form.areaTotal}
+              onChange={handleChange}
+            />
+          </div>
 
-        <label>Endereço</label>
-        <input name="endereco" value={form.endereco} onChange={handleChange} />
+          <div>
+            <label className="block font-medium">Área Construída</label>
+            <input
+              type="number"
+              name="areaConstruida"
+              className="input"
+              value={form.areaConstruida}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
 
-        <label>Número</label>
-        <input name="numero" value={form.numero} onChange={handleChange} />
+        {/* Endereço */}
+        <div>
+          <label className="block font-medium">Endereço</label>
+          <input
+            name="endereco"
+            className="input"
+            value={form.endereco}
+            onChange={handleChange}
+          />
+        </div>
 
-        <label>Complemento</label>
-        <input name="complemento" value={form.complemento} onChange={handleChange} />
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="block font-medium">Número</label>
+            <input
+              name="numero"
+              className="input"
+              value={form.numero}
+              onChange={handleChange}
+            />
+          </div>
 
-        <label>CEP</label>
-        <input name="cep" value={form.cep} onChange={handleChange} />
+          <div>
+            <label className="block font-medium">Complemento</label>
+            <input
+              name="complemento"
+              className="input"
+              value={form.complemento}
+              onChange={handleChange}
+            />
+          </div>
 
-        <label>Tipo de Imóvel</label>
-        <select name="tipoImovel" value={form.tipoImovel} onChange={handleChange}>
-          <option value="">Selecione</option>
-          {tipos.map(t => (
-            <option key={t.id} value={t.id}>{t.nome}</option>
-          ))}
-        </select>
+          <div>
+            <label className="block font-medium">CEP</label>
+            <input
+              name="cep"
+              className="input"
+              value={form.cep}
+              onChange={handleChange}
+            />
+          </div>
+        </div>
 
-        <label>Bairro</label>
-        <select name="bairro" value={form.bairro} onChange={handleChange}>
-          <option value="">Selecione</option>
-          {bairros.map(b => (
-            <option key={b.id} value={b.id}>{b.nome}</option>
-          ))}
-        </select>
+        {/* Tipo e Bairro */}
+        <div>
+          <label className="block font-medium">Tipo de Imóvel</label>
+          <select
+            name="tipoImovel"
+            className="input"
+            value={form.tipoImovel}
+            onChange={handleChange}
+          >
+            <option value="">Selecione</option>
+            {tipos.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.nome}
+              </option>
+            ))}
+          </select>
+        </div>
 
-        <label>
-          <input type="checkbox" name="destaque" checked={form.destaque}
-            onChange={handleChange} /> Destaque
+        <div>
+          <label className="block font-medium">Bairro</label>
+          <select
+            name="bairro"
+            className="input"
+            value={form.bairro}
+            onChange={handleChange}
+          >
+            <option value="">Selecione</option>
+            {bairros.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Destaque */}
+        <label className="flex items-center gap-2 mt-2">
+          <input
+            type="checkbox"
+            name="destaque"
+            checked={form.destaque}
+            onChange={handleChange}
+          />
+          Destaque
         </label>
 
-        <button className="btn">Salvar</button>
+        {/* Botão */}
+        <button className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+          Salvar
+        </button>
       </form>
     </div>
   );

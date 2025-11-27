@@ -1,67 +1,82 @@
-// src/pages/imoveis/UploadFotos.jsx
 import React, { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
 import { uploadFoto } from "../../services/fotoService";
+import { useParams } from "react-router-dom";
 
 export default function UploadFotos() {
-  const { id } = useParams(); // id do imovel (se quiser associar)
-  const navigate = useNavigate();
-  const [files, setFiles] = useState([]);
-  const [uploading, setUploading] = useState(false);
+  const { id } = useParams(); // ID do imóvel na URL
+  const [arquivo, setArquivo] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [capa, setCapa] = useState("N");
+  const [ordem, setOrdem] = useState("");
 
-  function handleFiles(e) {
-    setFiles(Array.from(e.target.files));
+  function handleFile(e) {
+    const file = e.target.files[0];
+    setArquivo(file);
+    setPreview(URL.createObjectURL(file));
   }
 
-  async function handleUpload() {
-    if (files.length === 0) {
-      alert("Selecione ao menos uma foto");
+  async function enviar() {
+    if (!arquivo) {
+      alert("Selecione um arquivo.");
       return;
     }
-    setUploading(true);
+
+    const dadosDto = {
+      capa,
+      ordem,
+      imovelId: Number(id) // necessário para vincular a foto ao imóvel
+    };
+
     try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        // preparar DTO de foto — seu backend exige capa e ordem no DTO
-        const dadosDto = {
-          id: null,
-          nomeArquivo: null,
-          caminho: null,
-          capa: i === 0 ? "S" : "N", // marcar primeira como capa (exemplo)
-          ordem: String(i + 1)
-        };
-        await uploadFoto(file, dadosDto);
-      }
-      alert("Fotos enviadas com sucesso");
-      navigate(`/imoveis/${id}`);
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao enviar fotos");
-    } finally {
-      setUploading(false);
+      await uploadFoto(arquivo, dadosDto);
+      alert("Foto enviada com sucesso!");
+      setArquivo(null);
+      setPreview(null);
+      setOrdem("");
+      setCapa("N");
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao enviar foto.");
     }
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-semibold mb-4">Upload de fotos</h1>
-      <div className="bg-white p-6 rounded shadow space-y-4">
-        <input type="file" multiple accept="image/*" onChange={handleFiles} />
-        {files.length > 0 && (
-          <div className="grid grid-cols-3 gap-2">
-            {files.map((f, i) => (
-              <div key={i} className="border rounded p-1">
-                <img src={URL.createObjectURL(f)} alt={f.name} className="h-28 w-full object-cover rounded" />
-                <div className="text-xs mt-1">{f.name}</div>
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="flex gap-2 justify-end">
-          <button onClick={() => navigate(-1)} className="px-4 py-2 rounded bg-gray-200">Cancelar</button>
-          <button onClick={handleUpload} disabled={uploading} className="px-4 py-2 rounded bg-indigo-600 text-white">{uploading ? "Enviando..." : "Enviar fotos"}</button>
-        </div>
+    <div className="p-4">
+      <h1>Upload de Fotos — Imóvel #{id}</h1>
+
+      <input type="file" accept="image/*" onChange={handleFile} />
+
+      {preview && (
+        <img
+          src={preview}
+          alt="preview"
+          style={{ width: 300, marginTop: 10, border: "1px solid #ccc" }}
+        />
+      )}
+
+      <div className="mt-3">
+        <label>Capa:</label>
+        <select value={capa} onChange={(e) => setCapa(e.target.value)}>
+          <option value="N">Não</option>
+          <option value="S">Sim</option>
+        </select>
       </div>
+
+      <div className="mt-2">
+        <label>Ordem:</label>
+        <input
+          type="number"
+          value={ordem}
+          onChange={(e) => setOrdem(e.target.value)}
+        />
+      </div>
+
+      <button
+        onClick={enviar}
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
+      >
+        Enviar Foto
+      </button>
     </div>
   );
 }

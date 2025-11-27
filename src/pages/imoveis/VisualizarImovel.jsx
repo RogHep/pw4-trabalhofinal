@@ -1,8 +1,6 @@
-// src/pages/imoveis/VisualizarImovel.jsx
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { buscarImovel } from "../../services/imovelService";
 import api from "../../services/api";
+import { useParams } from "react-router-dom";
 
 export default function VisualizarImovel() {
   const { id } = useParams();
@@ -10,60 +8,45 @@ export default function VisualizarImovel() {
   const [fotos, setFotos] = useState([]);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const data = await buscarImovel(id);
-        setImovel(data);
-        // não há endpoint GET /fotos/{imovelId} no seu controller; se existir, ajuste:
-        // tentativa: GET /fotos?imovelId={id} ou outro. Aqui, tentamos GET /fotos (filtrar localmente)
-        try {
-          const res = await api.get("/fotos");
-          // se backend não oferecer fotos, ignore
-          setFotos(res.data || []);
-        } catch (err) {
-          // backend não tem GET /fotos — fotos podem ser tratadas depois
-          setFotos([]);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    })();
+    api.get(`/imoveis/${id}`).then((res) => setImovel(res.data));
+
+    // Tentativa 1: buscar endpoint por imóvel (quando você ativar no backend)
+    api
+      .get(`/fotos/imovel/${id}`)
+      .then((res) => setFotos(res.data))
+      .catch(() => {
+        // Tentativa 2: fallback para /fotos (modelo atual do seu backend)
+        api.get(`/fotos`).then((res) => {
+          // filtra por imovelId, caso venha junto
+          setFotos(res.data.filter((f) => f.imovelId === Number(id)));
+        });
+      });
   }, [id]);
 
-  if (!imovel) return <div>Carregando...</div>;
+  if (!imovel) return <p>Carregando...</p>;
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-semibold">{imovel.titulo}</h1>
-        <div className="flex gap-2">
-          <Link to={`/imoveis/${id}/editar`} className="px-3 py-1 border rounded">Editar</Link>
-          <Link to={`/imoveis/${id}/fotos`} className="px-3 py-1 border rounded">Gerenciar Fotos</Link>
-        </div>
-      </div>
+    <div className="p-4">
+      <h1>{imovel.titulo}</h1>
+      <p>{imovel.descricao}</p>
 
-      {/* Carousel simples */}
-      <div className="mb-4">
-        {fotos.length === 0 ? (
-          <div className="bg-gray-100 p-8 rounded">Nenhuma foto disponível</div>
-        ) : (
-          <div className="flex gap-4 overflow-x-auto py-2">
-            {fotos.map((f, idx) => (
-              <img key={idx} src={f.caminho || f.url || (`/uploads/${f.nomeArquivo}`)} alt={f.nomeArquivo || idx}
-                className="h-48 w-auto object-cover rounded shadow" />
-            ))}
-          </div>
-        )}
-      </div>
+      <h3 className="mt-4">Fotos</h3>
 
-      <div className="bg-white p-6 rounded shadow">
-        <p className="text-gray-700 mb-2">{imovel.descricao}</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div><strong>Preço venda:</strong> {imovel.precoVenda ? `R$ ${Number(imovel.precoVenda).toFixed(2)}` : "-" }</div>
-          <div><strong>Dormitórios:</strong> {imovel.dormitorios ?? "-"}</div>
-          <div><strong>Garagem:</strong> {imovel.garagem ?? "-"}</div>
+      {fotos.length === 0 ? (
+        <p>Nenhuma foto cadastrada</p>
+      ) : (
+        <div className="flex gap-2 overflow-x-auto">
+          {fotos.map((foto) => (
+            <img
+              key={foto.id}
+              src={`file:///${foto.caminho}`}
+              alt=""
+              className="rounded"
+              style={{ height: 150 }}
+            />
+          ))}
         </div>
-      </div>
+      )}
     </div>
   );
 }

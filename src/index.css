@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ----------- SEUS ESTILOS PERSONALIZADOS ----------- */
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5; /* Exemplo */
+  font-family: Arial, sans-serif;
+}
+
+/* Se quiser sobrescrever algo do Tailwind */
+h1 {
+  font-weight: 600;
+}
