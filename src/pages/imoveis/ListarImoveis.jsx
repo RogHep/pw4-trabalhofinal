@@ -50,18 +50,41 @@ export default function ListarImoveis() {
         <div className="space-y-4">
           {imoveis.map(imovel => (
             <div key={imovel.id} className="bg-white p-4 rounded shadow flex justify-between items-center">
+              
+              {/* DADOS DO IMÓVEL */}
               <div>
-                <div className="font-medium text-gray-800">{imovel.titulo || `#${imovel.id}`}</div>
-                <div className="text-sm text-gray-600">{imovel.endereco || ""} {imovel.numero ? `, ${imovel.numero}` : ""}</div>
-                <div className="text-sm text-gray-700 mt-1">{imovel.precoVenda ? `R$ ${Number(imovel.precoVenda).toFixed(2)}` : ""}</div>
+                <div className="font-medium text-gray-800">
+                  {imovel.titulo || `#${imovel.id}`}
+                </div>
+                <div className="text-sm text-gray-600">
+                  {imovel.endereco || ""} {imovel.numero ? `, ${imovel.numero}` : ""}
+                </div>
+                <div className="text-sm text-gray-700 mt-1">
+                  {imovel.precoVenda ? `R$ ${Number(imovel.precoVenda).toFixed(2)}` : ""}
+                </div>
               </div>
+
+              {/* BOTÕES */}
               <div className="flex items-center gap-2">
                 <Link to={`/imoveis/${imovel.id}`} className="px-3 py-1 border rounded text-sm">Ver</Link>
-                <Link to={`/imoveis/${imovel.id}/editar`} className="px-3 py-1 border rounded text-sm">Editar</Link>
-                <button onClick={() => handleDelete(imovel.id)} className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600">
+
+                <Link to={`/imoveis/${imovel.id}/editar`} className="px-3 py-1 border rounded text-sm">
+                  Editar
+                </Link>
+
+                {/* ➕ AQUI ESTÁ O BOTÃO GERENCIAR FOTOS */}
+                <Link to={`/imoveis/${imovel.id}/fotos`} className="px-3 py-1 border rounded text-sm text-indigo-600">
+                  Gerenciar Fotos
+                </Link>
+
+                <button
+                  onClick={() => handleDelete(imovel.id)}
+                  className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
+                >
                   Excluir
                 </button>
               </div>
+
             </div>
           ))}
         </div>

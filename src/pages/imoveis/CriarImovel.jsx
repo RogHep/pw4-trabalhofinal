@@ -1,7 +1,9 @@
 // src/pages/imoveis/CriarImovel.jsx
+
 import { useState, useEffect } from "react";
 import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
+
 
 export default function CriarImovel() {
   const navigate = useNavigate();
@@ -65,16 +67,17 @@ export default function CriarImovel() {
       bairro: { id: Number(form.bairro) },
     };
 
-    api
-      .post("/imoveis", payload)
-      .then(() => {
-        alert("Imóvel cadastrado com sucesso!");
-        navigate("/imoveis");
-      })
-      .catch((err) => {
-        console.error(err);
-        alert("Erro ao salvar imóvel. Confira se todos os campos obrigatórios foram preenchidos.");
-      });
+    api.post("/imoveis", payload)
+  .then(res => {
+    const novoId = res.data.id;
+    alert("Imóvel cadastrado com sucesso!");
+    navigate(`/imoveis/${novoId}/fotos`);
+  })
+  .catch(err => {
+    console.log(err);
+    alert("Erro ao salvar.");
+  });
+
   }
 
   return (

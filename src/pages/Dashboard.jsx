@@ -26,28 +26,25 @@ export default function Dashboard() {
   }, []);
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
-        <Link to="/imoveis/criar" className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
-          Novo Imóvel
-        </Link>
-      </div>
+    <div className="flex items-center justify-between mb-6">
+  <h1 className="text-2xl font-semibold text-gray-800">Dashboard</h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg p-5 shadow">
-          <div className="text-sm text-gray-500">Imóveis</div>
-          <div className="mt-2 text-2xl font-bold text-gray-800">{counts.imoveis}</div>
-        </div>
-        <div className="bg-white rounded-lg p-5 shadow">
-          <div className="text-sm text-gray-500">Tipos de Imóvel</div>
-          <div className="mt-2 text-2xl font-bold text-gray-800">{counts.tipos}</div>
-        </div>
-        <div className="bg-white rounded-lg p-5 shadow">
-          <div className="text-sm text-gray-500">Bairros</div>
-          <div className="mt-2 text-2xl font-bold text-gray-800">{counts.bairros}</div>
-        </div>
-      </div>
-    </div>
+  <div className="flex gap-2">
+    <Link 
+      to="/imoveis"
+      className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+    >
+      Gerenciar Imóveis
+    </Link>
+
+    <Link 
+      to="/imoveis/criar"
+      className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+    >
+      Novo Imóvel
+    </Link>
+  </div>
+</div>
+
   );
 }

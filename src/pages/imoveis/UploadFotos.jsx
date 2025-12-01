@@ -1,13 +1,23 @@
-import React, { useState } from "react";
-import { uploadFoto } from "../../services/fotoService";
+import React, { useState, useEffect } from "react";
+import { uploadFoto, listarFotosDoImovel, deletarFoto, urlFoto } from "../../services/fotoService";
 import { useParams } from "react-router-dom";
 
 export default function UploadFotos() {
-  const { id } = useParams(); // ID do imóvel na URL
+  const { id } = useParams();
   const [arquivo, setArquivo] = useState(null);
   const [preview, setPreview] = useState(null);
   const [capa, setCapa] = useState("N");
   const [ordem, setOrdem] = useState("");
+  const [fotos, setFotos] = useState([]);
+
+  async function carregarFotos() {
+    const f = await listarFotosDoImovel(id);
+    setFotos(f);
+  }
+
+  useEffect(() => {
+    carregarFotos();
+  }, []);
 
   function handleFile(e) {
     const file = e.target.files[0];
@@ -24,20 +34,26 @@ export default function UploadFotos() {
     const dadosDto = {
       capa,
       ordem,
-      imovelId: Number(id) // necessário para vincular a foto ao imóvel
+      imovelId: Number(id),
     };
 
     try {
       await uploadFoto(arquivo, dadosDto);
-      alert("Foto enviada com sucesso!");
       setArquivo(null);
       setPreview(null);
-      setOrdem("");
       setCapa("N");
+      setOrdem("");
+      carregarFotos();
     } catch (e) {
       console.error(e);
       alert("Erro ao enviar foto.");
     }
+  }
+
+  async function excluir(idFoto) {
+    if (!confirm("Excluir esta foto?")) return;
+    await deletarFoto(idFoto);
+    carregarFotos();
   }
 
   return (
@@ -50,7 +66,7 @@ export default function UploadFotos() {
         <img
           src={preview}
           alt="preview"
-          style={{ width: 300, marginTop: 10, border: "1px solid #ccc" }}
+          style={{ width: 300, height: 200, objectFit: "cover", marginTop: 10 }}
         />
       )}
 
@@ -71,12 +87,26 @@ export default function UploadFotos() {
         />
       </div>
 
-      <button
-        onClick={enviar}
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
-      >
+      <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded" onClick={enviar}>
         Enviar Foto
       </button>
+
+      <h2 className="mt-6">Fotos enviadas</h2>
+
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
+        {fotos.map((f) => (
+          <div key={f.id}>
+            <img
+              src={urlFoto(f.nomeArquivo)}
+              style={{ width: 200, height: 150, objectFit: "cover" }}
+            />
+            <br />
+            <button onClick={() => excluir(f.id)} className="mt-2 bg-red-600 text-white px-3 py-1 rounded">
+              Remover
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

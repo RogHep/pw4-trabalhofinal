@@ -1,42 +1,57 @@
+/* ================================
+   Estilos Globais — Painel Admin
+   ================================ */
+
+/* Remove efeitos do template do Vite */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Fonte padrão global */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f3f4f6; /* cinza claro */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif;
+  color: #1f2937; /* gray-800 */
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Remove decoração de links */
+a {
+  text-decoration: none;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+/* Sutil hover para links globais */
+a:hover {
+  opacity: 0.85;
 }
 
-.card {
-  padding: 2em;
-}
-
+/* Remove estilos inúteis do Vite */
+.logo,
+.card,
 .read-the-docs {
-  color: #888;
+  display: none !important;
+}
+
+/* Scrollbar mais discreta */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9e9e9e;
+}
+
+/* Garantir que o layout expanda corretamente */
+html,
+body,
+#root {
+  height: 100%;
 }
