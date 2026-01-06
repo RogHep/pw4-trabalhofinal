@@ -1,93 +1,76 @@
 // src/pages/imoveis/ListarImoveis.jsx
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { listarImoveis, deletarImovel } from "../../services/imovelService";
+import api from "../../services/api";
+import { Link } from "react-router-dom";
 
 export default function ListarImoveis() {
   const [imoveis, setImoveis] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [bairros, setBairros] = useState([]);
+  const [bairroSelecionado, setBairroSelecionado] = useState("");
+
+  // Carregar imóveis
+  async function carregarImoveis() {
+    const resp = await api.get("/imoveis");
+    setImoveis(resp.data);
+  }
+
+  // Carregar bairros
+  async function carregarBairros() {
+    const resp = await api.get("/bairros");
+    setBairros(resp.data);
+  }
+
+  // Filtros
+  const imoveisFiltrados = bairroSelecionado
+    ? imoveis.filter((i) => i.bairro.id === Number(bairroSelecionado))
+    : imoveis;
 
   useEffect(() => {
-    (async () => {
-      try {
-        const data = await listarImoveis();
-        setImoveis(data || []);
-      } catch (err) {
-        console.error("Erro listar imóveis:", err);
-      } finally {
-        setLoading(false);
-      }
-    })();
+    carregarImoveis();
+    carregarBairros();
   }, []);
-
-  async function handleDelete(id) {
-    if (!confirm("Confirma exclusão deste imóvel?")) return;
-    try {
-      await deletarImovel(id);
-      setImoveis(prev => prev.filter(i => i.id !== id));
-    } catch (err) {
-      console.error(err);
-      alert("Erro ao excluir imóvel.");
-    }
-  }
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold text-gray-800">Imóveis</h1>
-        <div className="flex gap-2">
-          <Link to="/imoveis/criar" className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Novo</Link>
-          <button onClick={() => navigate(0)} className="px-3 py-2 border rounded">Atualizar</button>
-        </div>
+      <h1 className="text-2xl font-bold mb-4">Imóveis</h1>
+
+      {/* FILTRO POR BAIRRO */}
+      <div className="mb-4">
+        <label className="mr-2 font-semibold">Filtrar por Bairro:</label>
+
+        <select
+          value={bairroSelecionado}
+          onChange={(e) => setBairroSelecionado(e.target.value)}
+          className="border px-2 py-1 rounded"
+        >
+          <option value="">Todos</option>
+          {bairros.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.nome}
+            </option>
+          ))}
+        </select>
       </div>
 
-      {loading ? (
-        <div className="text-gray-600">Carregando...</div>
-      ) : imoveis.length === 0 ? (
-        <div className="text-gray-600">Nenhum imóvel cadastrado.</div>
+      {/* LISTAGEM */}
+      {imoveisFiltrados.length === 0 ? (
+        <p>Nenhum imóvel encontrado.</p>
       ) : (
-        <div className="space-y-4">
-          {imoveis.map(imovel => (
-            <div key={imovel.id} className="bg-white p-4 rounded shadow flex justify-between items-center">
-              
-              {/* DADOS DO IMÓVEL */}
-              <div>
-                <div className="font-medium text-gray-800">
-                  {imovel.titulo || `#${imovel.id}`}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {imovel.endereco || ""} {imovel.numero ? `, ${imovel.numero}` : ""}
-                </div>
-                <div className="text-sm text-gray-700 mt-1">
-                  {imovel.precoVenda ? `R$ ${Number(imovel.precoVenda).toFixed(2)}` : ""}
-                </div>
-              </div>
+        imoveisFiltrados.map((i) => (
+          <div key={i.id} className="mb-4 p-3 border-b">
+            <p className="font-bold">{i.titulo}</p>
+            <p>{i.endereco}</p>
+            <p>{i.tipo?.nome}</p>
+            <p>Bairro: {i.bairro?.nome}</p>
+            <p>R$ {i.valor}</p>
 
-              {/* BOTÕES */}
-              <div className="flex items-center gap-2">
-                <Link to={`/imoveis/${imovel.id}`} className="px-3 py-1 border rounded text-sm">Ver</Link>
-
-                <Link to={`/imoveis/${imovel.id}/editar`} className="px-3 py-1 border rounded text-sm">
-                  Editar
-                </Link>
-
-                {/* ➕ AQUI ESTÁ O BOTÃO GERENCIAR FOTOS */}
-                <Link to={`/imoveis/${imovel.id}/fotos`} className="px-3 py-1 border rounded text-sm text-indigo-600">
-                  Gerenciar Fotos
-                </Link>
-
-                <button
-                  onClick={() => handleDelete(imovel.id)}
-                  className="px-3 py-1 bg-red-500 text-white rounded text-sm hover:bg-red-600"
-                >
-                  Excluir
-                </button>
-              </div>
-
+            <div className="mt-2 flex gap-3">
+              <Link to={`/imoveis/${i.id}`}>Ver</Link>
+              <Link to={`/imoveis/${i.id}/editar`}>Editar</Link>
+              <Link to={`/imoveis/${i.id}/fotos`}>Gerenciar Fotos</Link>
             </div>
-          ))}
-        </div>
+          </div>
+        ))
       )}
     </div>
   );

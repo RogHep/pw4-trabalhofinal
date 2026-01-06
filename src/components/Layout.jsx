@@ -1,16 +1,16 @@
-// src/components/Layout.jsx
 import React from "react";
 import { Outlet, Link } from "react-router-dom";
 import Navbar from "./Navbar";
 
 export default function Layout() {
+
   return (
     <div className="flex min-h-screen bg-gray-100">
 
-      {/* SIDEBAR */}
+      {/* SIDEBAR — aparece para admin e corretor */}
       <aside className="w-64 bg-white shadow-md hidden md:flex flex-col">
         <div className="px-6 py-4 border-b">
-          <h2 className="text-xl font-bold text-gray-700">Imobiliária Admin</h2>
+          <h2 className="text-xl font-bold text-gray-700">Menu</h2>
         </div>
 
         <nav className="flex-1 px-4 py-6 space-y-2">
@@ -37,21 +37,18 @@ export default function Layout() {
         </nav>
       </aside>
 
-      {/* ÁREA PRINCIPAL */}
+      {/* CONTEÚDO PRINCIPAL */}
       <div className="flex-1 flex flex-col">
 
-        {/* NAVBAR */}
         <Navbar />
 
-        {/* CONTEÚDO */}
         <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6">
           <Outlet />
         </main>
 
-        {/* RODAPÉ */}
         <footer className="border-t bg-white mt-6">
           <div className="max-w-7xl mx-auto px-4 py-4 text-sm text-gray-500">
-            © {new Date().getFullYear()} Imobiliária — Painel Administrativo
+            © {new Date().getFullYear()} Imobiliária — Sistema
           </div>
         </footer>
       </div>

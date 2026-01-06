@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
 
-
 export default function CriarImovel() {
   const navigate = useNavigate();
 
@@ -46,13 +45,40 @@ export default function CriarImovel() {
     }));
   }
 
+  // 📌 Criar um novo tipo de imóvel
+  function criarTipo() {
+    const nome = prompt("Digite o nome do novo tipo de imóvel:");
+    if (!nome) return;
+
+    api.post("/tiposimoveis", { nome })
+      .then((res) => {
+        setTipos((prev) => [...prev, res.data]);
+        setForm((prev) => ({ ...prev, tipoImovel: res.data.id }));
+        alert("Tipo de imóvel criado com sucesso!");
+      })
+      .catch(() => alert("Erro ao criar tipo de imóvel"));
+  }
+
+  // 📌 Criar um novo bairro
+  function criarBairro() {
+    const nome = prompt("Digite o nome do novo bairro:");
+    if (!nome) return;
+
+    api.post("/bairros", { nome })
+      .then((res) => {
+        setBairros((prev) => [...prev, res.data]);
+        setForm((prev) => ({ ...prev, bairro: res.data.id }));
+        alert("Bairro criado com sucesso!");
+      })
+      .catch(() => alert("Erro ao criar bairro"));
+  }
+
   function salvar(e) {
     e.preventDefault();
 
     const payload = {
       ...form,
 
-      // Conversão de campos numéricos
       precoVenda: form.precoVenda ? Number(form.precoVenda) : null,
       precoAluguel: form.precoAluguel ? Number(form.precoAluguel) : null,
       areaTotal: form.areaTotal ? Number(form.areaTotal) : null,
@@ -62,22 +88,20 @@ export default function CriarImovel() {
       banheiros: form.banheiros ? Number(form.banheiros) : null,
       garagem: form.garagem ? Number(form.garagem) : null,
 
-      // Objetos obrigatórios
       tipoImovel: { id: Number(form.tipoImovel) },
       bairro: { id: Number(form.bairro) },
     };
 
     api.post("/imoveis", payload)
-  .then(res => {
-    const novoId = res.data.id;
-    alert("Imóvel cadastrado com sucesso!");
-    navigate(`/imoveis/${novoId}/fotos`);
-  })
-  .catch(err => {
-    console.log(err);
-    alert("Erro ao salvar.");
-  });
-
+      .then((res) => {
+        const novoId = res.data.id;
+        alert("Imóvel cadastrado com sucesso!");
+        navigate(`/imoveis/${novoId}/fotos`);
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("Erro ao salvar.");
+      });
   }
 
   return (
@@ -268,39 +292,62 @@ export default function CriarImovel() {
           </div>
         </div>
 
-        {/* Tipo e Bairro */}
+        {/* Tipo de Imóvel */}
         <div>
           <label className="block font-medium">Tipo de Imóvel</label>
-          <select
-            name="tipoImovel"
-            className="input"
-            value={form.tipoImovel}
-            onChange={handleChange}
-          >
-            <option value="">Selecione</option>
-            {tipos.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.nome}
-              </option>
-            ))}
-          </select>
+
+          <div className="flex gap-2">
+            <select
+              name="tipoImovel"
+              className="input w-full"
+              value={form.tipoImovel}
+              onChange={handleChange}
+            >
+              <option value="">Selecione</option>
+              {tipos.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.nome}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="button"
+              onClick={criarTipo}
+              className="bg-green-600 text-white px-3 rounded"
+            >
+              Novo
+            </button>
+          </div>
         </div>
 
+        {/* Bairro */}
         <div>
           <label className="block font-medium">Bairro</label>
-          <select
-            name="bairro"
-            className="input"
-            value={form.bairro}
-            onChange={handleChange}
-          >
-            <option value="">Selecione</option>
-            {bairros.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.nome}
-              </option>
-            ))}
-          </select>
+
+          <div className="flex gap-2">
+            <select
+              name="bairro"
+              className="input w-full"
+              value={form.bairro}
+              onChange={handleChange}
+            >
+              <option value="">Selecione</option>
+              {bairros.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.nome}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="button"
+              onClick={criarBairro}
+              className="bg-green-600 text-white px-3 rounded"
+            >
+              Novo
+            </button>
+          </div>
         </div>
 
         {/* Destaque */}
